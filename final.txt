@@ -1,0 +1,126 @@
+Sub StartHere()
+    Dim xSh As Worksheet
+    Application.ScreenUpdating = False
+    For Each xSh In Worksheets
+        xSh.Select
+        Call Alpha1
+        Call Alpha2
+    Next
+    Application.ScreenUpdating = True
+    ' found this snippet online
+End Sub
+Sub Alpha1()
+Dim numrows As Long
+Dim tickersymbol As String
+Dim openval As Double
+Dim closeval As Double
+Dim totalvol As Double
+Dim changedpct As Double
+Dim changeval As Double
+Dim summaryrow As Integer
+
+' get the number of rows to work on
+numrows = ActiveSheet.UsedRange.Rows.Count
+totalvol = 0
+openval = 0
+closeval = 0
+changedpct = 0
+summaryrow = 2
+
+' Load starting values
+openval = Cells(2, 3).Value
+
+
+For i = 2 To numrows
+    totalvol = totalvol + Cells(i, 7).Value
+    tickersymbol = Cells(i, 1).Value
+    
+    ' Test the next Row
+        If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+            ' Write the other values to the summary and increment the summaryrow value
+            closeval = Cells(i, 6).Value
+            ' write the ticker symbol to the summary area
+            Cells(summaryrow, 9).Value = tickersymbol
+            ' Calc yearly change
+            
+            changeval = closeval - openval
+            Cells(summaryrow, 10).Value = changeval
+            ' paint according to instructions
+            If changeval > 0 Then
+                Cells(summaryrow, 10).Interior.ColorIndex = 4
+                Else: Cells(summaryrow, 10).Interior.ColorIndex = 3
+            End If
+            ' check for 0 value in changeval and closeval
+                If changeval = 0 And closeval = 0 Then
+                    changeval = 0
+                    closeval = 0
+                    changepct = 0
+                Else
+                    changepct = changeval / closeval
+                    Cells(summaryrow, 11).Value = Format(changepct, "0.00%")
+                    Cells(summaryrow, 12).Value = totalvol
+                End If
+            ' reset the variables for the next pass
+            closeval = 0
+            totalvol = 0
+            openval = 0
+            changepct = 0
+            summaryrow = summaryrow + 1
+            openval = Cells(i + 1, 3).Value
+  
+        
+        End If
+     
+     
+    Next i
+
+End Sub
+
+Sub Alpha2()
+Dim maxpercent As Double
+Dim minpercent As Double
+Dim maxvolume As Double
+Dim maxticker As String
+Dim minticker As String
+Dim volticker As String
+Dim numrows As Double
+
+
+
+    ' get the number of rows in the summary area
+    numrows = Range("K" & Rows.Count).End(xlUp).Row
+    
+    maxpercent = 0
+    minpercent = 0
+    maxvolume = 0
+    
+    For i = 2 To numrows
+        ' find the Greatest Percent increase
+        If Cells(i, 11).Value > maxpercent Then
+            maxpercent = Cells(i, 11).Value
+            maxticker = Cells(i, 9).Value
+        End If
+            ' find the Greatest % Decrease
+            If Cells(i, 11).Value < minpercent Then
+                minpercent = Cells(i, 11).Value
+                minticker = Cells(i, 9).Value
+            End If
+                ' Find the Greates Volume
+                If Cells(i, 12).Value > maxvolme Then
+                maxvolume = Cells(i, 12).Value
+                volticker = Cells(i, 9).Value
+                End If
+                
+                    
+    Next i
+            ' write the values to the sheet
+            Cells(2, 16).Value = maxticker
+            Cells(2, 17).Value = maxpercent
+            Cells(3, 16).Value = minticker
+            Cells(3, 17).Value = minpercent
+            Cells(4, 16).Value = volticker
+            Cells(4, 17).Value = maxvolume
+
+
+End Sub
+
